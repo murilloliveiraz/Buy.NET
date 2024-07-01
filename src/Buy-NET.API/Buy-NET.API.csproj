@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Buy_NET.API</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4"/>
+    <PackageReference Include="AutoMapper" Version="13.0.1"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10"/>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.10"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10"/>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.4.0"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.10"/>
+  </ItemGroup>
+
+</Project>
