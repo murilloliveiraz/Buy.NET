@@ -1,4 +1,5 @@
 using System.Text;
+using Buy_NET.API.Data.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,10 +20,10 @@ app.Run();
 // Metodo que configrua as injeções de dependencia do projeto.
 static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
 {
-    // string? connectionString = builder.Configuration.GetConnectionString("PADRAO");
-    // builder.Services.AddDbContext<ApplicationContext>(options =>
-    //     options.UseNpgsql(connectionString), ServiceLifetime.Transient, ServiceLifetime.Transient
-    // );
+    string? connectionString = builder.Configuration.GetConnectionString("PADRAO");
+    builder.Services.AddDbContext<ApplicationContext>(options =>
+        options.UseNpgsql(connectionString), ServiceLifetime.Transient, ServiceLifetime.Transient
+    );
     builder.Services
     .AddSingleton(builder.Configuration)
     .AddSingleton(builder.Environment);
