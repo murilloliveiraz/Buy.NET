@@ -10,7 +10,7 @@ public class User
     public string Email { get; set; }    
     [Required(ErrorMessage = "É obrigatório informar uma senha")]
     public string Password { get; set; }
-    public string? Role { get; set; } = "Customer";
+    public string? Role { get; set; }
     [Required]
     public DateTime RegistrationDate { get; set; }
     public DateTime? InactivationDate { get; set; }
