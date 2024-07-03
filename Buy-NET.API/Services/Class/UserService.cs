@@ -1,3 +1,4 @@
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
@@ -12,16 +13,31 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly TokenService _tokenService;
 
-    public UserService(IUserRepository userRepository, IMapper mapper)
+    public UserService(IUserRepository userRepository, IMapper mapper, TokenService tokenService)
     {
         _userRepository = userRepository;
         _mapper = mapper;
+        _tokenService = tokenService;
     }
 
-    public Task<UserLoginResponseContract> Authenticate(UserLoginRequestContract user)
+    public async Task<UserLoginResponseContract> Authenticate(UserLoginRequestContract userRequest)
     {
-        throw new NotImplementedException();
+        UserResponseContract user = await GetByEmail(userRequest.Email);
+        var passwordHash = CreatePasswordHash(userRequest.Password);
+
+        if (user is null || user.Password != passwordHash)
+        {
+            throw new AuthenticationException("Usuário ou senha inválida");
+        }
+
+        return new UserLoginResponseContract{
+            Id = user.Id,
+            Email = user.Email,
+            Role = user.Role,
+            Token = _tokenService.GenerateToken(_mapper.Map<User>(user)),
+        };
     }
 
     public async Task<UserResponseContract> Create(UserRequestContract model, long idUser)
@@ -78,7 +94,7 @@ public class UserService : IUserService
         {
             byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
             byte[] passwordHashBytes = sha256.ComputeHash(passwordBytes);
-            passwordHash = BitConverter.ToString(passwordHashBytes).ToLower();
+            passwordHash = BitConverter.ToString(passwordHashBytes).Replace("-", "").ToLower();
         }
 
         return passwordHash;
