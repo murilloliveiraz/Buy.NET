@@ -1,5 +1,7 @@
 using System.Text;
+using AutoMapper;
 using Buy_NET.API.Data.Contexts;
+using Buy_NET.API.Mappers;
 using Buy_NET.API.Repositories.Class;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,9 +28,17 @@ static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
     builder.Services.AddDbContext<ApplicationContext>(options =>
         options.UseNpgsql(connectionString), ServiceLifetime.Transient, ServiceLifetime.Transient
     );
+
+    var config = new MapperConfiguration(configs => {
+        configs.AddProfile<UserProfile>();
+    });
+
+    IMapper mapper = config.CreateMapper();
+
     builder.Services
     .AddSingleton(builder.Configuration)
     .AddSingleton(builder.Environment)
+    .AddSingleton(mapper)
     .AddScoped<IUserRepository, UserRepository>();
 }
 
