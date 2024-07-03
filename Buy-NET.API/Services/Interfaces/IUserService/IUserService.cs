@@ -5,4 +5,5 @@ namespace Buy_NET.API.Services.Interfaces.IUserService;
 public interface IUserService : IService<UserRequestContract, UserResponseContract, long>
 {
     Task<UserLoginResponseContract> Authenticate(UserLoginRequestContract user);    
+    Task<UserResponseContract> GetByEmail(string email);    
 }

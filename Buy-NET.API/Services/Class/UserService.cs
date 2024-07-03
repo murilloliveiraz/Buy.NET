@@ -28,28 +28,46 @@ public class UserService : IUserService
     {
         var user = _mapper.Map<User>(model);
         user.Password = CreatePasswordHash(user.Password);
+        user.RegistrationDate = DateTime.Now;
         user = await _userRepository.Create(user);
         return _mapper.Map<UserResponseContract>(user);
     }
 
-    public Task<UserResponseContract> Delete(long id, long idUser)
+    public async Task Delete(long id, long idUser)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetById(id) ?? throw new Exception("usuário não encontrado");
+        await _userRepository.Delete(_mapper.Map<User>(user));
+
     }
 
-    public Task<IEnumerable<UserResponseContract>> Get(long idUser)
+    public async Task<IEnumerable<UserResponseContract>> Get(long idUser)
     {
-        throw new NotImplementedException();
+        var users = await _userRepository.Get();
+        return users.Select(user => _mapper.Map<UserResponseContract>(user));
     }
 
-    public Task<UserResponseContract> GetById(long idUser, long id)
+    public async Task<UserResponseContract> GetByEmail(string email)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetByEmail(email);
+        return _mapper.Map<UserResponseContract>(user);
     }
 
-    public Task<UserResponseContract> Update(long id, UserRequestContract model, long idUser)
+    public async Task<UserResponseContract> GetById(long idUser, long id)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetById(id);
+        return _mapper.Map<UserResponseContract>(user);
+    }
+
+    public async Task<UserResponseContract> Update(long id, UserRequestContract model, long idUser)
+    {
+        _ = await _userRepository.GetById(id) ?? throw new Exception("usuário não encontrado");
+
+        var user = _mapper.Map<User>(model);
+        user.Id = id;
+        user.Password = CreatePasswordHash(model.Password);
+
+        user = await _userRepository.Update(user);
+        return _mapper.Map<UserResponseContract>(user);
     }
 
     private string CreatePasswordHash(string password)

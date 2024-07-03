@@ -5,7 +5,7 @@ namespace Buy_NET.API.Domain.Models;
 public class User
 {
     [Key]
-    public int Id { get; set; }
+    public long Id { get; set; }
     [Required(ErrorMessage = "É obrigatório informar um email")]
     public string Email { get; set; }    
     [Required(ErrorMessage = "É obrigatório informar uma senha")]
