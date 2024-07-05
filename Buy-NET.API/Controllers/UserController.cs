@@ -1,15 +1,15 @@
 using System.Security.Authentication;
 using Buy_NET.API.Contracts.User;
-using Buy_NET.API.Services.Interfaces.IUserService;
+using Buy_NET.API.Services.Interfaces.UserService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Buy_NET.API.Controllers;
 
 [ApiController]
-[Route("[Controller]")]
+[Route("usuarios")]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IUserService  _userService;
 
     public UserController(IUserService userService)
     {
@@ -21,7 +21,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            return Created("", await _userService.Create(user, 0));
+            return Created("", await _userService.Create(user));
         }
         catch (Exception ex)
         {
@@ -52,7 +52,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            return Ok(await _userService.Get(0));
+            return Ok(await _userService.Get());
         }
         catch (Exception ex)
         {
@@ -67,7 +67,7 @@ public class UserController : ControllerBase
         {
             if (id.HasValue)
             {
-                return Ok(await _userService.GetById(id.Value, 0));
+                return Ok(await _userService.GetById(id.Value));
             }
             else if(!string.IsNullOrEmpty(email))
             {
@@ -89,7 +89,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            return Ok(await _userService.Update(id, user, 0));
+            return Ok(await _userService.Update(id, user));
         }
         catch (Exception ex)
         {
@@ -102,7 +102,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            await _userService.Delete(id, 0);
+            await _userService.Delete(id);
             return NoContent();
         }
         catch (Exception ex)
