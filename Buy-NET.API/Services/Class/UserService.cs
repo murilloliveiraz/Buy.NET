@@ -40,7 +40,7 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<UserResponseContract> Create(UserRequestContract model, long idUser)
+    public async Task<UserResponseContract> Create(UserRequestContract model)
     {
         var user = _mapper.Map<User>(model);
         user.Password = CreatePasswordHash(user.Password);
@@ -50,14 +50,14 @@ public class UserService : IUserService
         return _mapper.Map<UserResponseContract>(user);
     }
 
-    public async Task Delete(long id, long idUser)
+    public async Task Delete(long id)
     {
         var user = await _userRepository.GetById(id) ?? throw new Exception("usuário não encontrado");
         await _userRepository.Delete(_mapper.Map<User>(user));
 
     }
 
-    public async Task<IEnumerable<UserResponseContract>> Get(long idUser)
+    public async Task<IEnumerable<UserResponseContract>> Get()
     {
         var users = await _userRepository.Get();
         return users.Select(user => _mapper.Map<UserResponseContract>(user));
@@ -69,13 +69,13 @@ public class UserService : IUserService
         return _mapper.Map<UserResponseContract>(user);
     }
 
-    public async Task<UserResponseContract> GetById(long id, long idUser)
+    public async Task<UserResponseContract> GetById(long id)
     {
         var user = await _userRepository.GetById(id);
         return _mapper.Map<UserResponseContract>(user);
     }
 
-    public async Task<UserResponseContract> Update(long id, UserRequestContract model, long idUser)
+    public async Task<UserResponseContract> Update(long id, UserRequestContract model)
     {
         _ = await _userRepository.GetById(id) ?? throw new Exception("usuário não encontrado");
 

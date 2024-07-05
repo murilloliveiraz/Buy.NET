@@ -37,6 +37,11 @@ public class CategoryRepository : ICategoryRepository
     {
         return await _context.Category.AsNoTracking().Where(c => c.Id == id).FirstOrDefaultAsync();
     }
+    
+    public async Task<Category?> GetByName(string name)
+    {
+        return await _context.Category.AsNoTracking().Where(c => c.Name == name).FirstOrDefaultAsync();
+    }
 
     public async Task<Category> Update(Category model)
     {
