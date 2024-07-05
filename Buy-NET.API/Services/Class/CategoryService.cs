@@ -52,9 +52,10 @@ public class CategoryService : ICategoryService
     public async Task<CategoryResponseContract> Update(long id, CategoryRequestContract model)
     {
         Category category = await _categoryRepository.GetById(id);
-        category.Name = model.Name;
-        category.Description = model.Description;
-        category = await _categoryRepository.Update(category);
-        return _mapper.Map<CategoryResponseContract>(category);
+        var categoryContract = _mapper.Map<Category>(model);
+        categoryContract.Id = category.Id;
+        categoryContract.RegistrationDate = category.RegistrationDate;
+        categoryContract = await _categoryRepository.Update(categoryContract);
+        return _mapper.Map<CategoryResponseContract>(categoryContract);
     }
 }

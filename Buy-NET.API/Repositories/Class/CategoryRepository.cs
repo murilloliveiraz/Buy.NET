@@ -45,8 +45,9 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<Category> Update(Category model)
     {
-        Category? entityAtDatabase = await _context.Category.Where(c => c.Id == model.Id).FirstOrDefaultAsync();
+        Category entityAtDatabase = await _context.Category.Where(c => c.Id == model.Id).FirstOrDefaultAsync();
         _context.Entry(entityAtDatabase).CurrentValues.SetValues(model);
+        _context.Update<Category>(entityAtDatabase);
         await _context.SaveChangesAsync();
         return entityAtDatabase;
     }
