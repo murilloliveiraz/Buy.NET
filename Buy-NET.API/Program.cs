@@ -4,6 +4,8 @@ using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Mappers;
 using Buy_NET.API.Repositories.Class;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
+using Buy_NET.API.Services.Class;
+using Buy_NET.API.Services.Interfaces.IUserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -39,6 +41,8 @@ static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
     .AddSingleton(builder.Configuration)
     .AddSingleton(builder.Environment)
     .AddSingleton(mapper)
+    .AddScoped<TokenService>()
+    .AddScoped<IUserService, UserService>()
     .AddScoped<IUserRepository, UserRepository>();
 }
 
