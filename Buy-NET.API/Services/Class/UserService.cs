@@ -45,6 +45,7 @@ public class UserService : IUserService
         var user = _mapper.Map<User>(model);
         user.Password = CreatePasswordHash(user.Password);
         user.RegistrationDate = DateTime.Now;
+        user.Role ??= "Customer";
         user = await _userRepository.Create(user);
         return _mapper.Map<UserResponseContract>(user);
     }
@@ -68,7 +69,7 @@ public class UserService : IUserService
         return _mapper.Map<UserResponseContract>(user);
     }
 
-    public async Task<UserResponseContract> GetById(long idUser, long id)
+    public async Task<UserResponseContract> GetById(long id, long idUser)
     {
         var user = await _userRepository.GetById(id);
         return _mapper.Map<UserResponseContract>(user);
