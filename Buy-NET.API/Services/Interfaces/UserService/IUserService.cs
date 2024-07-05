@@ -1,6 +1,6 @@
 using Buy_NET.API.Contracts.User;
 
-namespace Buy_NET.API.Services.Interfaces.IUserService;
+namespace Buy_NET.API.Services.Interfaces.UserService;
 
 public interface IUserService : IService<UserRequestContract, UserResponseContract, long>
 {

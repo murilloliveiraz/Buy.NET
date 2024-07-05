@@ -8,7 +8,8 @@ using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
 using Buy_NET.API.Services.Class;
 using Buy_NET.API.Services.Interfaces.CategoryServiceInterfaces;
-using Buy_NET.API.Services.Interfaces.IUserService;
+using Buy_NET.API.Services.Interfaces.ProductServiceInterfaces;
+using Buy_NET.API.Services.Interfaces.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -51,6 +52,7 @@ static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
     .AddScoped<IUserRepository, UserRepository>()
     .AddScoped<ICategoryService, CategoryService>()
     .AddScoped<ICategoryRepository, CategoryRepository>()
+    .AddScoped<IProductService,ProductService>()
     .AddScoped<IProductRepository, ProductRepository>();
 }
 

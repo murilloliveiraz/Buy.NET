@@ -5,7 +5,7 @@ using AutoMapper;
 using Buy_NET.API.Contracts.User;
 using Buy_NET.API.Domain.Models;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
-using Buy_NET.API.Services.Interfaces.IUserService;
+using Buy_NET.API.Services.Interfaces.UserService;
 
 namespace Buy_NET.API.Services.Class;
 
