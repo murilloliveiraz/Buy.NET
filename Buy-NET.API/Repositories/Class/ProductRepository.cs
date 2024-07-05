@@ -45,8 +45,9 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product> Update(Product model)
     {
-        Product? entityAtDatabase = await _context.Product.Where(c => c.Id == model.Id).FirstOrDefaultAsync();
+        Product entityAtDatabase = await _context.Product.Where(c => c.Id == model.Id).FirstOrDefaultAsync();
         _context.Entry(entityAtDatabase).CurrentValues.SetValues(model);
+        _context.Update<Product>(entityAtDatabase);
         await _context.SaveChangesAsync();
         return entityAtDatabase;
     }

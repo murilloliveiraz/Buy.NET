@@ -52,11 +52,11 @@ public class ProductService : IProductService
     public async Task<ProductResponseContract> Update(long id, ProductRequestContract model)
     {
         Product product = await _productRepository.GetById(id);
+        // var productUpdated = _mapper.Map<Product>(model);
         product.Name = model.Name;
         product.Description = model.Description;
         product.Price = model.Price;
         product.StockQuantity = model.StockQuantity;
-        product.CategoryId = model.CategoryId;
         product = await _productRepository.Update(product);
         return _mapper.Map<ProductResponseContract>(product);
     }
