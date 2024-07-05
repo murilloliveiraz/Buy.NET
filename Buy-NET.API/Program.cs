@@ -3,6 +3,8 @@ using AutoMapper;
 using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Mappers;
 using Buy_NET.API.Repositories.Class;
+using Buy_NET.API.Repositories.Interfaces.CategoryRepositoryInterface;
+using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
 using Buy_NET.API.Services.Class;
 using Buy_NET.API.Services.Interfaces.IUserService;
@@ -33,6 +35,8 @@ static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
 
     var config = new MapperConfiguration(configs => {
         configs.AddProfile<UserProfile>();
+        configs.AddProfile<CategoryProfile>();
+        configs.AddProfile<ProductProfile>();
     });
 
     IMapper mapper = config.CreateMapper();
@@ -43,7 +47,9 @@ static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
     .AddSingleton(mapper)
     .AddScoped<TokenService>()
     .AddScoped<IUserService, UserService>()
-    .AddScoped<IUserRepository, UserRepository>();
+    .AddScoped<IUserRepository, UserRepository>()
+    .AddScoped<ICategoryRepository, CategoryRepository>()
+    .AddScoped<IProductRepository, ProductRepository>();
 }
 
 // Configura o serviços da API.
@@ -80,7 +86,7 @@ static void ConfigurarServices(WebApplicationBuilder builder)
                 Array.Empty<string>()
             }
         });
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "ControleFacil.Api", Version = "v1" });   
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "BuyNET.Api", Version = "v1" });   
     });
 
     builder.Services.AddAuthentication(x =>
