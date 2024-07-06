@@ -39,6 +39,8 @@ static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
         configs.AddProfile<UserProfile>();
         configs.AddProfile<CategoryProfile>();
         configs.AddProfile<ProductProfile>();
+        configs.AddProfile<OrderProfile>();
+        configs.AddProfile<OrderItemProfile>();
     });
 
     IMapper mapper = config.CreateMapper();
