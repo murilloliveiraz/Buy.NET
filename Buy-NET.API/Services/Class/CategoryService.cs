@@ -27,8 +27,8 @@ public class CategoryService : ICategoryService
 
     public async Task Delete(long id)
     {
-        Category expenseCategory = await _categoryRepository.GetById(id);
-        await _categoryRepository.Delete(_mapper.Map<Category>(expenseCategory));
+        Category category = await _categoryRepository.GetById(id);
+        await _categoryRepository.Delete(_mapper.Map<Category>(category));
     }
 
     public async Task<IEnumerable<CategoryResponseContract>> Get()

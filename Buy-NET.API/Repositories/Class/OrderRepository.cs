@@ -30,12 +30,20 @@ public class OrderRepository : IOrderRepository
 
     public async Task<IEnumerable<Order?>> Get()
     {
-        return await _context.Order.AsNoTracking().OrderBy(o => o.Id).ToListAsync();
+        return await _context.Order
+                            .AsNoTracking().
+                            Include(o => o.Items)
+                            .ThenInclude(oi => oi.Product).
+                            OrderBy(o => o.Id)
+                            .ToListAsync();
     }
 
-    public async Task<Order?> GetById(long id)
+     public async Task<Order?> GetById(long id)
     {
-        return await _context.Order.AsNoTracking().Where(o => o.Id == id).FirstOrDefaultAsync();
+        return await _context.Order
+            .Include(o => o.Items)
+                .ThenInclude(oi => oi.Product)
+            .FirstOrDefaultAsync(o => o.Id == id);
     }
 
     public async Task<Order> Update(Order model)
