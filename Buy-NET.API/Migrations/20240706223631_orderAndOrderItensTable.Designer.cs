@@ -3,6 +3,7 @@ using System;
 using Buy_NET.API.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Buy_NET.API.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20240706223631_orderAndOrderItensTable")]
+    partial class orderAndOrderItensTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,10 +64,6 @@ namespace Buy_NET.API.Migrations
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR");
 
                     b.HasKey("Id");
 

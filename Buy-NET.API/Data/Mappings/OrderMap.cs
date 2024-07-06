@@ -11,8 +11,12 @@ public class OrderMap : IEntityTypeConfiguration<Order>
         builder.ToTable("orders")
         .HasKey(p => p.Id);
         
-        builder.Property(u => u.OrderDate)
+        builder.Property(o => o.OrderDate)
         .HasColumnType("timestamp")
+        .IsRequired();
+
+        builder.Property(o => o.Status)
+        .HasColumnType("VARCHAR")
         .IsRequired();
 
         builder.HasMany(o => o.Items)

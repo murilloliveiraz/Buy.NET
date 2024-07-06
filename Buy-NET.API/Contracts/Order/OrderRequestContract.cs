@@ -4,6 +4,6 @@ namespace Buy_NET.API.Contracts.Order;
 
 public class OrderRequestContract
 {
-    public int CustomerId { get; set; }
+    public long CustomerId { get; set; }
     public List<OrderItemRequestContract> Items { get; set; }
 }
