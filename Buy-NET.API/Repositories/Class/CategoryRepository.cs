@@ -1,5 +1,6 @@
 using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Domain.Models;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.CategoryRepositoryInterface;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,17 +31,17 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<IEnumerable<Category?>> Get()
     {
-        return await _context.Category.AsNoTracking().OrderBy(c => c.Id).ToListAsync();
+        return await _context.Category.AsNoTracking().OrderBy(c => c.Id).ToListAsync() ?? throw new NotFoundException("Nenhuma categoria encontrada");
     }
 
     public async Task<Category?> GetById(long id)
     {
-        return await _context.Category.AsNoTracking().Where(c => c.Id == id).FirstOrDefaultAsync();
+        return await _context.Category.AsNoTracking().Where(c => c.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("A categoria não existe");
     }
     
     public async Task<Category?> GetByName(string name)
     {
-        return await _context.Category.AsNoTracking().Where(c => c.Name == name).FirstOrDefaultAsync();
+        return await _context.Category.AsNoTracking().Where(c => c.Name == name).FirstOrDefaultAsync() ?? throw new NotFoundException("A categoria não existe");
     }
 
     public async Task<Category> Update(Category model)

@@ -1,5 +1,6 @@
 using System.Text;
 using AutoMapper;
+using Buy_NET.API.Contracts.Error;
 using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Mappers;
 using Buy_NET.API.Repositories.Class;
@@ -116,6 +117,28 @@ static void ConfigurarServices(WebApplicationBuilder builder)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["KeySecret"])),
             ValidateIssuer = false,
             ValidateAudience = false
+        };
+        x.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                // Suprimir o comportamento padrão do OnChallenge
+                context.HandleResponse();
+
+                // Definir o objeto de erro personalizado
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                var errorResponse = new ErrorContract
+                {
+                    StatusCode = 401,
+                    Title = "Unauthorized",
+                    Description = "Você precisa estar autenticado para acessar este recurso.",
+                    Date = DateTime.Now,
+                };
+
+                // Escrever o objeto de erro na resposta
+                return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(errorResponse));
+            }
         };
     });
 }

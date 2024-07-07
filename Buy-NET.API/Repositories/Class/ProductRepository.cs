@@ -1,5 +1,6 @@
 using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Domain.Models;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,17 +31,17 @@ public class ProductRepository : IProductRepository
 
     public async Task<IEnumerable<Product?>> Get()
     {
-        return await _context.Product.AsNoTracking().OrderBy(c => c.Id).ToListAsync();
+        return await _context.Product.AsNoTracking().OrderBy(c => c.Id).ToListAsync() ?? throw new NotFoundException("Nenhum produto encontrado");;
     }
 
     public async Task<Product?> GetById(long id)
     {
-        return await _context.Product.AsNoTracking().Where(c => c.Id == id).FirstOrDefaultAsync();
+        return await _context.Product.AsNoTracking().Where(c => c.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Nenhum produto encontrado");;
     }
 
     public async Task<Product?> GetByName(string name)
     {
-        return await _context.Product.AsNoTracking().Where(c => c.Name == name).FirstOrDefaultAsync();
+        return await _context.Product.AsNoTracking().Where(c => c.Name == name).FirstOrDefaultAsync() ?? throw new NotFoundException("Nenhum produto encontrado");;
     }
 
     public async Task<Product> Update(Product model)

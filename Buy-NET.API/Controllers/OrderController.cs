@@ -1,4 +1,6 @@
+using System.Security.Authentication;
 using Buy_NET.API.Contracts.Order;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Services.Interfaces.OrderServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,16 +24,36 @@ public class OrderController : BaseControllerBuyNet
     {
         try
         {
-            var id = GetLoggedInUser();
+            long? id = GetLoggedInUser();
+            if (id is null || id == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             if (id != order.CustomerId)
             {
-                return Unauthorized("Voce não pode fazer um pedido em nome de outro usuário");
+                throw new ForbiddenException("Voce não pode fazer um pedido em nome de outro usuário");
             }
             var createdOrder = await _orderService.Create(order);
         
             var orderResponse = await _orderService.GetById(createdOrder.Id);
 
             return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, orderResponse);
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -46,12 +68,33 @@ public class OrderController : BaseControllerBuyNet
     {
         try
         {
+            long? id = GetLoggedInUser();
+            if (id is null || id == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                return Unauthorized("Voce não possui permissão para listar todos os pedidos");
+                throw new ForbiddenException("Voce não possui permissão para listar todos os pedidos");
             }
             return Ok(await _orderService.Get());
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -65,12 +108,33 @@ public class OrderController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                return Unauthorized("Voce não possui permissão para buscar por pedidos com um id especifico");
+                throw new ForbiddenException("Voce não possui permissão para buscar por pedidos com um id especifico");
             }
             return Ok(await _orderService.GetById(id));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -84,9 +148,30 @@ public class OrderController : BaseControllerBuyNet
     {
         try
         {
+            long? id = GetLoggedInUser();
+            if (id is null || id == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             long userId = GetLoggedInUser();
             var orders = await _orderService.GetByUserId(userId);
             return Ok(orders);
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -100,6 +185,11 @@ public class OrderController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             long userId = GetLoggedInUser();
             var order = await _orderService.GetByIdAndUserId(id, userId);
             if (order == null)
@@ -107,6 +197,22 @@ public class OrderController : BaseControllerBuyNet
                 return NotFound("Pedido não encontrado");
             }
             return Ok(order);
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -121,6 +227,11 @@ public class OrderController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
@@ -128,6 +239,22 @@ public class OrderController : BaseControllerBuyNet
             }
             await _orderService.Delete(id);
             return NoContent();
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {

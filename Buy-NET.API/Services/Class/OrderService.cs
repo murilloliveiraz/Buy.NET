@@ -2,7 +2,9 @@ using AutoMapper;
 using Buy_NET.API.Contracts.Order;
 using Buy_NET.API.Contracts.OrderItem;
 using Buy_NET.API.Domain.Models;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.OrderRepositoryInterfaces;
+using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
 using Buy_NET.API.Services.Interfaces.OrderServiceInterfaces;
 
 namespace Buy_NET.API.Services.Class;
@@ -10,6 +12,7 @@ namespace Buy_NET.API.Services.Class;
 public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
+    private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
 
     public OrderService(IOrderRepository orderRepository, IMapper mapper)
@@ -20,6 +23,10 @@ public class OrderService : IOrderService
 
     public async Task<OrderResponseContract> Create(OrderRequestContract model)
     {
+        if (model is null)
+        {
+            throw new BadRequestException("O pedido não pode ser nulo");
+        }
         Order order = _mapper.Map<Order>(model);
         order.OrderDate = DateTime.Now;
         order.Status = "Pendente";
@@ -32,12 +39,20 @@ public class OrderService : IOrderService
     public async Task Delete(long id)
     {
         Order order = await _orderRepository.GetById(id);
+        if (order is null)
+        {
+            throw new NotFoundException("Pedido não encontrado");
+        }
         await _orderRepository.Delete(order);
     }
 
     public async Task<IEnumerable<OrderResponseContract>> Get()
     {
         var orders = await _orderRepository.Get();
+        if (orders is null)
+        {
+            throw new NotFoundException("Nenhum pedido encontrado");
+        }
 
         var orderResponseList = orders.Select(o => 
         {
@@ -59,6 +74,10 @@ public class OrderService : IOrderService
     public async Task<OrderResponseContract> GetById(long id)
     {
         var order = await _orderRepository.GetById(id);
+        if (order is null)
+        {
+            throw new NotFoundException("Pedido não encontrado");
+        }
         if (order == null)
         {
             throw new KeyNotFoundException("Order não encontrada");
@@ -82,15 +101,19 @@ public class OrderService : IOrderService
     public async Task<IEnumerable<OrderResponseContract>> GetByUserId(long userId)
     {
         var orders = await _orderRepository.GetByUserId(userId);
+        if (orders is null)
+        {
+            throw new NotFoundException("Nenhum pedido não encontrado");
+        }
         return orders.Select(o => _mapper.Map<OrderResponseContract>(o));
     }
 
     public async Task<OrderResponseContract> GetByIdAndUserId(long id, long userId)
     {
         var order = await _orderRepository.GetByIdAndUserId(id, userId);
-        if (order == null)
+        if (order is null)
         {
-            throw new KeyNotFoundException("Order não encontrada");
+            throw new NotFoundException("Pedido não encontrado");
         }
         
         double total = order.Items.Sum(item => item.Quantity * item.Product.Price);

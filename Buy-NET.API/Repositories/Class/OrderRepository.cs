@@ -1,5 +1,6 @@
 using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Domain.Models;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.OrderRepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,7 +36,7 @@ public class OrderRepository : IOrderRepository
                             .Include(o => o.Items)
                             .ThenInclude(oi => oi.Product)
                             .OrderBy(o => o.Id)
-                            .ToListAsync();
+                            .ToListAsync() ?? throw new NotFoundException("Nenhum pedido encontrado");;
     }
 
      public async Task<Order?> GetById(long id)
@@ -43,7 +44,7 @@ public class OrderRepository : IOrderRepository
         return await _context.Order
             .Include(o => o.Items)
                 .ThenInclude(oi => oi.Product)
-            .FirstOrDefaultAsync(o => o.Id == id);
+            .FirstOrDefaultAsync(o => o.Id == id) ?? throw new NotFoundException("Nenhum pedido encontrado");;
     }
     
     public async Task<IEnumerable<Order?>> GetByUserId(long id)
@@ -54,7 +55,7 @@ public class OrderRepository : IOrderRepository
                             .Include(o => o.Items)
                             .ThenInclude(oi => oi.Product)
                             .OrderBy(o => o.Id)
-                            .ToListAsync();
+                            .ToListAsync() ?? throw new NotFoundException("Nenhum pedido encontrado");;
     }
 
     public async Task<Order?> GetByIdAndUserId(long id, long userId)
@@ -62,7 +63,7 @@ public class OrderRepository : IOrderRepository
         return await _context.Order
             .Include(o => o.Items)
                 .ThenInclude(oi => oi.Product)
-            .FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == userId);
+            .FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == userId) ?? throw new NotFoundException("Nenhum pedido encontrado");;
     }
 
     public async Task<Order> Update(Order model)

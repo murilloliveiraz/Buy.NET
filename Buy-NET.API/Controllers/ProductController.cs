@@ -1,4 +1,6 @@
+using System.Security.Authentication;
 using Buy_NET.API.Contracts.Product;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Services.Interfaces.ProductServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +24,11 @@ public class ProductController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
@@ -29,9 +36,24 @@ public class ProductController : BaseControllerBuyNet
             }
             return Created("", await _productService.Create(product));
         }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
+        }
         catch (Exception ex)
         {
-            
             return Problem(ex.Message);
         }
     }
@@ -42,7 +64,28 @@ public class ProductController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             return Ok(await _productService.Get());
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -56,6 +99,11 @@ public class ProductController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             if (id.HasValue)
             {
                 return Ok(await _productService.GetById(id.Value));
@@ -69,6 +117,22 @@ public class ProductController : BaseControllerBuyNet
                 return BadRequest("Voce deve informar um nome ou um Id.");
             }
         }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
+        }
         catch (Exception ex)
         {
             return Problem(ex.Message);
@@ -81,12 +145,33 @@ public class ProductController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
                 return Unauthorized("Voce não possui permissão para atualizar um produto");
             }
             return Ok(await _productService.Update(id, product));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -100,6 +185,11 @@ public class ProductController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
@@ -107,6 +197,22 @@ public class ProductController : BaseControllerBuyNet
             }
             await _productService.Delete(id);
             return NoContent();
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {

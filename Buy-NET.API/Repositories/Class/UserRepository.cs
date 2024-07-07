@@ -1,5 +1,6 @@
 using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Domain.Models;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,17 +31,17 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<User?>> Get()
     {
-        return await _context.User.AsNoTracking().OrderBy(u => u.Id).ToListAsync();
+        return await _context.User.AsNoTracking().OrderBy(u => u.Id).ToListAsync() ?? throw new NotFoundException("Nenhum usuário encontrado");;
     }
 
     public async Task<User?> GetByEmail(string email)
     {
-        return await _context.User.AsNoTracking().Where(u => u.Email == email).FirstOrDefaultAsync();
+        return await _context.User.AsNoTracking().Where(u => u.Email == email).FirstOrDefaultAsync() ?? throw new NotFoundException("Nenhum usuário encontrado");;
     }
 
     public async Task<User?> GetById(long id)
     {
-        return await _context.User.AsNoTracking().Where(u => u.Id == id).FirstOrDefaultAsync();
+        return await _context.User.AsNoTracking().Where(u => u.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Nenhum usuário encontrado");;
     }
 
     public async Task<User> Update(User model)

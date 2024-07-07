@@ -1,4 +1,6 @@
+using System.Security.Authentication;
 using Buy_NET.API.Contracts.Category;
+using Buy_NET.API.Exceptions;
 using Buy_NET.API.Services.Interfaces.CategoryServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,11 +25,32 @@ public class CategoryController : BaseControllerBuyNet
         try
         {
             var role = GetLoggedInUserRole();
+            long? id = GetLoggedInUser();
+            if (id is null || id == 0)
+            {
+                throw new UnauthorizedAccessException("É necessário fazer login para ter acesso a esse método");
+            }
             if (role != "Admin")
             {
-                return Unauthorized("Voce não possui permissão para criar uma categoria");
+                throw new ForbiddenException("Voce não possui permissão para criar uma categoria");
             }
             return Created("", await _categoryService.Create(category));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -42,7 +65,28 @@ public class CategoryController : BaseControllerBuyNet
     {
         try
         {
+            long? id = GetLoggedInUser();
+            if (id is null || id == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             return Ok(await _categoryService.Get());
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -56,6 +100,11 @@ public class CategoryController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             if (id.HasValue)
             {
                 return Ok(await _categoryService.GetById(id.Value));
@@ -69,6 +118,22 @@ public class CategoryController : BaseControllerBuyNet
                 return BadRequest("Voce deve informar um nome ou um Id.");
             }
         }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
+        }
         catch (Exception ex)
         {
             return Problem(ex.Message);
@@ -81,12 +146,33 @@ public class CategoryController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                return Unauthorized("Voce não possui permissão para atualizar uma categoria");
+                throw new ForbiddenException("Voce não possui permissão para atualizar uma categoria");
             }
             return Ok(await _categoryService.Update(id, category));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
@@ -100,13 +186,34 @@ public class CategoryController : BaseControllerBuyNet
     {
         try
         {
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                return Unauthorized("Voce não possui permissão para deletar uma categoria");
+                throw new ForbiddenException("Voce não possui permissão para deletar uma categoria");
             }
             await _categoryService.Delete(id);
             return NoContent();
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch(BadRequestException ex)
+        {
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
         }
         catch (Exception ex)
         {
