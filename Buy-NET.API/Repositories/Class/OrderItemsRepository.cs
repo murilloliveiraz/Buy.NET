@@ -24,11 +24,11 @@ public class OrderItemsRepository : IOrderItemsRepository
 
     public async Task<IEnumerable<OrderItem?>> Get()
     {
-        return await _context.OrderItem.AsNoTracking().OrderBy(o => o.Id).ToListAsync();
+        return await _context.OrderItem.AsNoTracking().OrderBy(o => o.Id).Include(o => o.Product).ToListAsync();
     }
 
     public async Task<OrderItem?> GetById(long id)
     {
-        return await _context.OrderItem.AsNoTracking().Where(o => o.Id == id).FirstOrDefaultAsync();
+        return await _context.OrderItem.AsNoTracking().Where(o => o.Id == id).Include(o => o.Product).FirstOrDefaultAsync();
     }
 }
