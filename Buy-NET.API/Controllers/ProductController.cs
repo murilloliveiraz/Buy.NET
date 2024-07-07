@@ -1,12 +1,13 @@
 using Buy_NET.API.Contracts.Product;
 using Buy_NET.API.Services.Interfaces.ProductServiceInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Buy_NET.API.Controllers;
 
 [ApiController]
 [Route("produtos")]
-public class ProductController : ControllerBase
+public class ProductController : BaseControllerBuyNet
 {
     private readonly IProductService  _productService;
 
@@ -16,10 +17,16 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create(ProductRequestContract product)
     {
         try
         {
+            var role = GetLoggedInUserRole();
+            if (role != "Admin")
+            {
+                return Unauthorized("Voce não possui permissão para criar um produto");
+            }
             return Created("", await _productService.Create(product));
         }
         catch (Exception ex)
@@ -30,6 +37,7 @@ public class ProductController : ControllerBase
     }
     
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> Get()
     {
         try
@@ -43,6 +51,7 @@ public class ProductController : ControllerBase
     }
     
     [HttpGet("search")]
+    [Authorize]
     public async Task<IActionResult> Search([FromQuery] long? id, [FromQuery] string name)
     {
         try
@@ -67,10 +76,16 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> Update(long id, ProductRequestContract product)
     {
         try
         {
+            var role = GetLoggedInUserRole();
+            if (role != "Admin")
+            {
+                return Unauthorized("Voce não possui permissão para atualizar um produto");
+            }
             return Ok(await _productService.Update(id, product));
         }
         catch (Exception ex)
@@ -80,10 +95,16 @@ public class ProductController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(long id)
     {
         try
         {
+            var role = GetLoggedInUserRole();
+            if (role != "Admin")
+            {
+                return Unauthorized("Voce não possui permissão para deletar um produto");
+            }
             await _productService.Delete(id);
             return NoContent();
         }

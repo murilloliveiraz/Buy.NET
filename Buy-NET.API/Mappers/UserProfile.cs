@@ -9,6 +9,7 @@ public class UserProfile : Profile
     public UserProfile()
     {
         CreateMap<User, UserRequestContract>().ReverseMap();
+        CreateMap<User, UserUpdateRequestContract>().ReverseMap();
         CreateMap<User, UserResponseContract>().ReverseMap();
     }
 }

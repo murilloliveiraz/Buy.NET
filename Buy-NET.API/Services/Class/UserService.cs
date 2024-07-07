@@ -75,12 +75,13 @@ public class UserService : IUserService
         return _mapper.Map<UserResponseContract>(user);
     }
 
-    public async Task<UserResponseContract> Update(long id, UserRequestContract model)
+    public async Task<UserResponseContract> Update(long id, UserUpdateRequestContract model)
     {
-        _ = await _userRepository.GetById(id) ?? throw new Exception("usuário não encontrado");
+        var userAtdatabase = await _userRepository.GetById(id) ?? throw new Exception("usuário não encontrado");
 
         var user = _mapper.Map<User>(model);
         user.Id = id;
+        user.Role = userAtdatabase.Role;
         user.Password = CreatePasswordHash(model.Password);
 
         user = await _userRepository.Update(user);
