@@ -78,4 +78,34 @@ public class OrderService : IOrderService
         orderDto.Total = total;
         return orderDto;
     }
+
+    public async Task<IEnumerable<OrderResponseContract>> GetByUserId(long userId)
+    {
+        var orders = await _orderRepository.GetByUserId(userId);
+        return orders.Select(o => _mapper.Map<OrderResponseContract>(o));
+    }
+
+    public async Task<OrderResponseContract> GetByIdAndUserId(long id, long userId)
+    {
+        var order = await _orderRepository.GetByIdAndUserId(id, userId);
+        if (order == null)
+        {
+            throw new KeyNotFoundException("Order não encontrada");
+        }
+        
+        double total = order.Items.Sum(item => item.Quantity * item.Product.Price);
+        
+        var orderDto = _mapper.Map<OrderResponseContract>(order);
+        orderDto.Items = order.Items.Select(item => new OrderItemResponseContract
+        {
+            ProductId = item.ProductId,
+            ProductName = item.Product.Name,
+            Quantity = item.Quantity,
+            Price = item.Product.Price
+        }).ToList();
+        
+        orderDto.Total = total;
+        
+        return orderDto;
+    }
 }

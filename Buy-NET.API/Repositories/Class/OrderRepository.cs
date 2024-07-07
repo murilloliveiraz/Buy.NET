@@ -45,6 +45,25 @@ public class OrderRepository : IOrderRepository
                 .ThenInclude(oi => oi.Product)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
+    
+    public async Task<IEnumerable<Order?>> GetByUserId(long id)
+    {
+        return await _context.Order
+                            .AsNoTracking()
+                            .Where(o => o.CustomerId == id)
+                            .Include(o => o.Items)
+                            .ThenInclude(oi => oi.Product)
+                            .OrderBy(o => o.Id)
+                            .ToListAsync();
+    }
+
+    public async Task<Order?> GetByIdAndUserId(long id, long userId)
+    {
+        return await _context.Order
+            .Include(o => o.Items)
+                .ThenInclude(oi => oi.Product)
+            .FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == userId);
+    }
 
     public async Task<Order> Update(Order model)
     {
