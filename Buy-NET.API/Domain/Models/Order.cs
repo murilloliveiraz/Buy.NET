@@ -12,5 +12,5 @@ public class Order
     public string Status { get; set; }
     [Required]
     public DateTime OrderDate { get; set; }
-    public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+    public ICollection<OrderItem> Items { get; set; }
 }

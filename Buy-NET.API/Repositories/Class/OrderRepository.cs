@@ -31,10 +31,10 @@ public class OrderRepository : IOrderRepository
     public async Task<IEnumerable<Order?>> Get()
     {
         return await _context.Order
-                            .AsNoTracking().
-                            Include(o => o.Items)
-                            .ThenInclude(oi => oi.Product).
-                            OrderBy(o => o.Id)
+                            .AsNoTracking()
+                            .Include(o => o.Items)
+                            .ThenInclude(oi => oi.Product)
+                            .OrderBy(o => o.Id)
                             .ToListAsync();
     }
 

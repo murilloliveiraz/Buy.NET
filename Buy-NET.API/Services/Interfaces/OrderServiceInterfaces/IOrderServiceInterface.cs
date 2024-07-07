@@ -2,7 +2,7 @@ using Buy_NET.API.Contracts.Order;
 
 namespace Buy_NET.API.Services.Interfaces.OrderServiceInterfaces;
 
-public interface IOrderServiceInterface
+public interface IOrderService
 {
     Task<IEnumerable<OrderResponseContract>> Get ();
     Task<OrderResponseContract> GetById (long id);

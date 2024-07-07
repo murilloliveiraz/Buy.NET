@@ -2,27 +2,20 @@ using AutoMapper;
 using Buy_NET.API.Contracts.Order;
 using Buy_NET.API.Contracts.OrderItem;
 using Buy_NET.API.Domain.Models;
-using Buy_NET.API.Repositories.Interfaces.OrderItemsRepositoryInterfaces;
 using Buy_NET.API.Repositories.Interfaces.OrderRepositoryInterfaces;
-using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
-using Buy_NET.API.Services.Interfaces.OrderItemServiceInterfaces;
 using Buy_NET.API.Services.Interfaces.OrderServiceInterfaces;
 
 namespace Buy_NET.API.Services.Class;
 
-public class OrderService : IOrderServiceInterface
+public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly IOrderItemServiceInterface _orderItemService;
-    private readonly IProductRepository _productRepository;
     private readonly IMapper _mapper;
 
-    public OrderService(IOrderRepository orderRepository, IMapper mapper, IProductRepository productRepository, IOrderItemServiceInterface orderItemService)
+    public OrderService(IOrderRepository orderRepository, IMapper mapper)
     {
         _orderRepository = orderRepository;
         _mapper = mapper;
-        _productRepository = productRepository;
-        _orderItemService = orderItemService;
     }
 
     public async Task<OrderResponseContract> Create(OrderRequestContract model)
@@ -31,24 +24,8 @@ public class OrderService : IOrderServiceInterface
         order.OrderDate = DateTime.Now;
         order.Status = "Pendente";
 
-        foreach (var item in model.Items)
-        {
-            var product = await _productRepository.GetById(item.ProductId);
-            if (product == null)
-            {
-                throw new ArgumentException($"Produto com ID {item.ProductId} não encontrado.");
-            }
-
-            OrderItemRequestContract orderItem = new OrderItemRequestContract
-            {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity
-            };
-
-            await _orderItemService.Create(order.Id,orderItem);
-        }
-
         order = await _orderRepository.Create(order);
+
         return _mapper.Map<OrderResponseContract>(order);
     }
 
@@ -61,7 +38,22 @@ public class OrderService : IOrderServiceInterface
     public async Task<IEnumerable<OrderResponseContract>> Get()
     {
         var orders = await _orderRepository.Get();
-        return orders.Select(o => _mapper.Map<OrderResponseContract>(o));
+
+        var orderResponseList = orders.Select(o => 
+        {
+            var orderResponse = _mapper.Map<OrderResponseContract>(o);
+            orderResponse.Total = o.Items.Sum(item => item.Quantity * item.Product.Price);
+            orderResponse.Items = o.Items.Select(item => new OrderItemResponseContract
+            {
+                ProductId = item.ProductId,
+                ProductName = item.Product.Name,
+                Quantity = item.Quantity,
+                Price = item.Product.Price
+            }).ToList();
+            return orderResponse;
+        }).ToList();
+
+        return orderResponseList;
     }
 
     public async Task<OrderResponseContract> GetById(long id)
@@ -74,6 +66,15 @@ public class OrderService : IOrderServiceInterface
         double total = order.Items.Sum(item => item.Quantity * item.Product.Price);
 
         var orderDto = _mapper.Map<OrderResponseContract>(order);
+
+        orderDto.Items = order.Items.Select(item => new OrderItemResponseContract
+        {
+            ProductId = item.ProductId,
+            ProductName = item.Product.Name,
+            Quantity = item.Quantity,
+            Price = item.Product.Price
+        }).ToList();
+
         orderDto.Total = total;
         return orderDto;
     }

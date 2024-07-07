@@ -4,10 +4,13 @@ using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Mappers;
 using Buy_NET.API.Repositories.Class;
 using Buy_NET.API.Repositories.Interfaces.CategoryRepositoryInterface;
+using Buy_NET.API.Repositories.Interfaces.OrderItemsRepositoryInterfaces;
+using Buy_NET.API.Repositories.Interfaces.OrderRepositoryInterfaces;
 using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
 using Buy_NET.API.Services.Class;
 using Buy_NET.API.Services.Interfaces.CategoryServiceInterfaces;
+using Buy_NET.API.Services.Interfaces.OrderServiceInterfaces;
 using Buy_NET.API.Services.Interfaces.ProductServiceInterfaces;
 using Buy_NET.API.Services.Interfaces.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,7 +58,9 @@ static void ConfigurarInjecaoDeDependencia(WebApplicationBuilder builder)
     .AddScoped<ICategoryService, CategoryService>()
     .AddScoped<ICategoryRepository, CategoryRepository>()
     .AddScoped<IProductService,ProductService>()
-    .AddScoped<IProductRepository, ProductRepository>();
+    .AddScoped<IProductRepository, ProductRepository>()
+    .AddScoped<IOrderService, OrderService>()
+    .AddScoped<IOrderRepository, OrderRepository>();
 }
 
 // Configura o serviços da API.
