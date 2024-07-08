@@ -2,6 +2,7 @@ using System.Text;
 using AutoMapper;
 using Buy_NET.API.Contracts.Error;
 using Buy_NET.API.Data.Contexts;
+using Buy_NET.API.Infrastructure.Data.Services;
 using Buy_NET.API.Mappers;
 using Buy_NET.API.Repositories.Class;
 using Buy_NET.API.Repositories.Interfaces.CategoryRepositoryInterface;
@@ -26,7 +27,12 @@ ConfigurarServices(builder);
 ConfigurarInjecaoDeDependencia(builder);
 
 var app = builder.Build();
-
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.ApplyMigrations();
+}
 ConfigurarAplicacao(app);
 
 app.Run();

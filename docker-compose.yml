@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  buynet.api:
+    image: murilloxz/buynet:latest
+    container_name: buynet.api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - buynet.database
+
+  buynet.database:
+    image: postgres:latest
+    container_name: buynet.database
+    environment:
+      POSTGRES_DB: buynet
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    restart: always
+    volumes:
+      - ./.containers/buynet-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
