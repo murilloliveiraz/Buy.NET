@@ -1,48 +1,80 @@
 using System.Security.Authentication;
-using Buy_NET.API.Contracts.User;
-using Buy_NET.API.Exceptions;
-using Buy_NET.API.Services.Interfaces.UserService;
+using Buy_NET.API.Contracts.Category;
+using Buy_NET.API.Domain.Exceptions;
+using Buy_NET.API.Services.Interfaces.CategoryServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Buy_NET.API.Controllers;
 
 [ApiController]
-[Route("usuarios")]
-public class UserController : BaseControllerBuyNet
+[Route("categorias")]
+public class CategoryController : BaseControllerBuyNet
 {
-    private readonly IUserService  _userService;
+    private readonly ICategoryService  _categoryService;
 
-    public UserController(IUserService userService)
+    public CategoryController(ICategoryService categoryService)
     {
-        _userService = userService;
+        _categoryService = categoryService;
     }
 
     [HttpPost]
-    [AllowAnonymous]
-    public async Task<IActionResult> Create(UserRequestContract user)
+    [Authorize]
+    public async Task<IActionResult> Create(CategoryRequestContract category)
     {
         try
         {
-            return Created("", await _userService.Create(user));
+            var role = GetLoggedInUserRole();
+            long? id = GetLoggedInUser();
+            if (id is null || id == 0)
+            {
+                throw new UnauthorizedAccessException("É necessário fazer login para ter acesso a esse método");
+            }
+            if (role != "Admin")
+            {
+                throw new ForbiddenException("Voce não possui permissão para criar uma categoria");
+            }
+            return Created("", await _categoryService.Create(category));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
         }
         catch(BadRequestException ex)
         {
             return BadRequest(ThrowBadRequest(ex));
         }
+        catch(NotFoundException ex)
+        {
+            return NotFound(ThrowNotFound(ex));
+        }
         catch (Exception ex)
         {
+            
             return Problem(ex.Message);
         }
     }
-
-    [HttpPost("login")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Authenticate(UserLoginRequestContract user)
+    
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> Get()
     {
         try
         {
-            return Ok(await _userService.Authenticate(user));
+            long? id = GetLoggedInUser();
+            if (id is null || id == 0)
+            {
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+            }
+            return Ok(await _categoryService.Get());
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
         }
         catch(AuthenticationException ex)
         {
@@ -62,41 +94,9 @@ public class UserController : BaseControllerBuyNet
         }
     }
     
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> Get()
-    {
-        try
-        {
-            long? id = GetLoggedInUser();
-            if (id is null || id == 0)
-            {
-                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
-            }
-            var role = GetLoggedInUserRole();
-            if (role != "Admin")
-            {
-                throw new ForbiddenException("Voce não possui permissão para buscar todos os usuários");
-            }
-            return Ok(await _userService.Get());
-        }
-        catch(AuthenticationException ex)
-        {
-            return Unauthorized(ThrowUnauthorized(ex));
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, ThrowForbidden(ex));
-        }
-        catch (Exception ex)
-        {
-            return Problem(ex.Message);
-        }
-    }
-
     [HttpGet("search")]
     [Authorize]
-    public async Task<IActionResult> Search([FromQuery] long? id, [FromQuery] string email)
+    public async Task<IActionResult> Search([FromQuery] long? id, [FromQuery] string name)
     {
         try
         {
@@ -105,31 +105,26 @@ public class UserController : BaseControllerBuyNet
             {
                 throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
             }
-            var role = GetLoggedInUserRole();
-            if (role != "Admin")
-            {
-                throw new ForbiddenException("Voce não possui permissão para buscar um usuário por nome ou id");
-            }
             if (id.HasValue)
             {
-                return Ok(await _userService.GetById(id.Value));
+                return Ok(await _categoryService.GetById(id.Value));
             }
-            else if(!string.IsNullOrEmpty(email))
+            else if(!string.IsNullOrEmpty(name))
             {
-                return Ok(await _userService.GetByEmail(email));
+                return Ok(await _categoryService.GetByName(name));
             }
             else 
             {
-                return BadRequest("You must provide either an id or an email.");
+                return BadRequest("Voce deve informar um nome ou um Id.");
             }
-        }
-        catch(AuthenticationException ex)
-        {
-            return Unauthorized(ThrowUnauthorized(ex));
         }
         catch (ForbiddenException ex)
         {
             return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
         }
         catch(BadRequestException ex)
         {
@@ -147,7 +142,7 @@ public class UserController : BaseControllerBuyNet
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> Update(long id, UserUpdateRequestContract user)
+    public async Task<IActionResult> Update(long id, CategoryRequestContract category)
     {
         try
         {
@@ -156,21 +151,20 @@ public class UserController : BaseControllerBuyNet
             {
                 throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
             }
-            var userId = GetLoggedInUser();
             var role = GetLoggedInUserRole();
-            if (userId != id && role != "Admin")
+            if (role != "Admin")
             {
-                return Unauthorized("Voce não pode atualizar o registro de outro usuário");
+                throw new ForbiddenException("Voce não possui permissão para atualizar uma categoria");
             }
-            return Ok(await _userService.Update(id, user));
-        }
-        catch(AuthenticationException ex)
-        {
-            return Unauthorized(ThrowUnauthorized(ex));
+            return Ok(await _categoryService.Update(id, category));
         }
         catch (ForbiddenException ex)
         {
             return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
         }
         catch(BadRequestException ex)
         {
@@ -200,18 +194,18 @@ public class UserController : BaseControllerBuyNet
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                return Unauthorized("Voce não possui permissão para deletar um usuário");
+                throw new ForbiddenException("Voce não possui permissão para deletar uma categoria");
             }
-            await _userService.Delete(id);
+            await _categoryService.Delete(id);
             return NoContent();
-        }
-        catch(AuthenticationException ex)
-        {
-            return Unauthorized(ThrowUnauthorized(ex));
         }
         catch (ForbiddenException ex)
         {
             return StatusCode(403, ThrowForbidden(ex));
+        }
+        catch(AuthenticationException ex)
+        {
+            return Unauthorized(ThrowUnauthorized(ex));
         }
         catch(BadRequestException ex)
         {

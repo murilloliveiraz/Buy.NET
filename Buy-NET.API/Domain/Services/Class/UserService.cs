@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
 using Buy_NET.API.Contracts.User;
+using Buy_NET.API.Domain.Exceptions;
 using Buy_NET.API.Domain.Models;
 using Buy_NET.API.Repositories.Interfaces.UserRepositoryInterface;
 using Buy_NET.API.Services.Interfaces.UserService;
@@ -77,7 +78,7 @@ public class UserService : IUserService
 
     public async Task<UserResponseContract> Update(long id, UserUpdateRequestContract model)
     {
-        var userAtdatabase = await _userRepository.GetById(id) ?? throw new Exception("usuário não encontrado");
+        var userAtdatabase = await _userRepository.GetById(id) ?? throw new NotFoundException("usuário não encontrado");
 
         var user = _mapper.Map<User>(model);
         user.Id = id;

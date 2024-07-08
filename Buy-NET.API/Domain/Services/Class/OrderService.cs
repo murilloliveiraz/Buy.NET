@@ -1,8 +1,8 @@
 using AutoMapper;
 using Buy_NET.API.Contracts.Order;
 using Buy_NET.API.Contracts.OrderItem;
+using Buy_NET.API.Domain.Exceptions;
 using Buy_NET.API.Domain.Models;
-using Buy_NET.API.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.OrderRepositoryInterfaces;
 using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
 using Buy_NET.API.Services.Interfaces.OrderServiceInterfaces;

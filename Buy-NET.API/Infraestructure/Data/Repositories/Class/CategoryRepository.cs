@@ -1,6 +1,6 @@
 using Buy_NET.API.Data.Contexts;
 using Buy_NET.API.Domain.Models;
-using Buy_NET.API.Exceptions;
+using Buy_NET.API.Domain.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.CategoryRepositoryInterface;
 using Microsoft.EntityFrameworkCore;
 

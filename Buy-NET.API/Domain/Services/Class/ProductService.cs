@@ -1,7 +1,7 @@
 using AutoMapper;
 using Buy_NET.API.Contracts.Product;
+using Buy_NET.API.Domain.Exceptions;
 using Buy_NET.API.Domain.Models;
-using Buy_NET.API.Exceptions;
 using Buy_NET.API.Repositories.Interfaces.CategoryRepositoryInterface;
 using Buy_NET.API.Repositories.Interfaces.ProductRepositoryInterface;
 using Buy_NET.API.Services.Interfaces.ProductServiceInterfaces;

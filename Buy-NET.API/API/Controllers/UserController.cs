@@ -1,47 +1,48 @@
 using System.Security.Authentication;
-using Buy_NET.API.Contracts.Order;
-using Buy_NET.API.Exceptions;
-using Buy_NET.API.Services.Interfaces.OrderServiceInterfaces;
+using Buy_NET.API.Contracts.User;
+using Buy_NET.API.Domain.Exceptions;
+using Buy_NET.API.Services.Interfaces.UserService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Buy_NET.API.Controllers;
 
 [ApiController]
-[Route("pedidos")]
-public class OrderController : BaseControllerBuyNet
+[Route("usuarios")]
+public class UserController : BaseControllerBuyNet
 {
-    private readonly IOrderService _orderService;
+    private readonly IUserService  _userService;
 
-    public OrderController(IOrderService orderService)
+    public UserController(IUserService userService)
     {
-        _orderService = orderService;
+        _userService = userService;
     }
 
     [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Create(OrderRequestContract order)
+    [AllowAnonymous]
+    public async Task<IActionResult> Create(UserRequestContract user)
     {
         try
         {
-            long? id = GetLoggedInUser();
-            if (id is null || id == 0)
-            {
-                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
-            }
-            if (id != order.CustomerId)
-            {
-                throw new ForbiddenException("Voce não pode fazer um pedido em nome de outro usuário");
-            }
-            var createdOrder = await _orderService.Create(order);
-        
-            var orderResponse = await _orderService.GetById(createdOrder.Id);
-
-            return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, orderResponse);
+            return Created("", await _userService.Create(user));
         }
-        catch (ForbiddenException ex)
+        catch(BadRequestException ex)
         {
-            return StatusCode(403, ThrowForbidden(ex));
+            return BadRequest(ThrowBadRequest(ex));
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
+    }
+
+    [HttpPost("login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Authenticate(UserLoginRequestContract user)
+    {
+        try
+        {
+            return Ok(await _userService.Authenticate(user));
         }
         catch(AuthenticationException ex)
         {
@@ -57,7 +58,6 @@ public class OrderController : BaseControllerBuyNet
         }
         catch (Exception ex)
         {
-            
             return Problem(ex.Message);
         }
     }
@@ -76,25 +76,17 @@ public class OrderController : BaseControllerBuyNet
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                throw new ForbiddenException("Voce não possui permissão para listar todos os pedidos");
+                throw new ForbiddenException("Voce não possui permissão para buscar todos os usuários");
             }
-            return Ok(await _orderService.Get());
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, ThrowForbidden(ex));
+            return Ok(await _userService.Get());
         }
         catch(AuthenticationException ex)
         {
             return Unauthorized(ThrowUnauthorized(ex));
         }
-        catch(BadRequestException ex)
+        catch (ForbiddenException ex)
         {
-            return BadRequest(ThrowBadRequest(ex));
-        }
-        catch(NotFoundException ex)
-        {
-            return NotFound(ThrowNotFound(ex));
+            return StatusCode(403, ThrowForbidden(ex));
         }
         catch (Exception ex)
         {
@@ -102,9 +94,9 @@ public class OrderController : BaseControllerBuyNet
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("search")]
     [Authorize]
-    public async Task<IActionResult> GetById(long id)
+    public async Task<IActionResult> Search([FromQuery] long? id, [FromQuery] string email)
     {
         try
         {
@@ -116,54 +108,28 @@ public class OrderController : BaseControllerBuyNet
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                throw new ForbiddenException("Voce não possui permissão para buscar por pedidos com um id especifico");
+                throw new ForbiddenException("Voce não possui permissão para buscar um usuário por nome ou id");
             }
-            return Ok(await _orderService.GetById(id));
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, ThrowForbidden(ex));
-        }
-        catch(AuthenticationException ex)
-        {
-            return Unauthorized(ThrowUnauthorized(ex));
-        }
-        catch(BadRequestException ex)
-        {
-            return BadRequest(ThrowBadRequest(ex));
-        }
-        catch(NotFoundException ex)
-        {
-            return NotFound(ThrowNotFound(ex));
-        }
-        catch (Exception ex)
-        {
-            return Problem(ex.Message);
-        }
-    }
-
-    [HttpGet("meus-pedidos")]
-    [Authorize]
-    public async Task<IActionResult> GetUserOrders()
-    {
-        try
-        {
-            long? id = GetLoggedInUser();
-            if (id is null || id == 0)
+            if (id.HasValue)
             {
-                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
+                return Ok(await _userService.GetById(id.Value));
             }
-            long userId = GetLoggedInUser();
-            var orders = await _orderService.GetByUserId(userId);
-            return Ok(orders);
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, ThrowForbidden(ex));
+            else if(!string.IsNullOrEmpty(email))
+            {
+                return Ok(await _userService.GetByEmail(email));
+            }
+            else 
+            {
+                return BadRequest("You must provide either an id or an email.");
+            }
         }
         catch(AuthenticationException ex)
         {
             return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
         }
         catch(BadRequestException ex)
         {
@@ -179,9 +145,9 @@ public class OrderController : BaseControllerBuyNet
         }
     }
 
-    [HttpGet("meus-pedidos/{id}")]
+    [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> GetUserOrderById(long id)
+    public async Task<IActionResult> Update(long id, UserUpdateRequestContract user)
     {
         try
         {
@@ -190,21 +156,21 @@ public class OrderController : BaseControllerBuyNet
             {
                 throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
             }
-            long userId = GetLoggedInUser();
-            var order = await _orderService.GetByIdAndUserId(id, userId);
-            if (order == null)
+            var userId = GetLoggedInUser();
+            var role = GetLoggedInUserRole();
+            if (userId != id && role != "Admin")
             {
-                return NotFound("Pedido não encontrado");
+                return Unauthorized("Voce não pode atualizar o registro de outro usuário");
             }
-            return Ok(order);
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, ThrowForbidden(ex));
+            return Ok(await _userService.Update(id, user));
         }
         catch(AuthenticationException ex)
         {
             return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
         }
         catch(BadRequestException ex)
         {
@@ -219,7 +185,6 @@ public class OrderController : BaseControllerBuyNet
             return Problem(ex.Message);
         }
     }
-    
     
     [HttpDelete("{id}")]
     [Authorize]
@@ -235,18 +200,18 @@ public class OrderController : BaseControllerBuyNet
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                return Unauthorized("Voce não possui permissão para deletar um pedido");
+                return Unauthorized("Voce não possui permissão para deletar um usuário");
             }
-            await _orderService.Delete(id);
+            await _userService.Delete(id);
             return NoContent();
-        }
-        catch (ForbiddenException ex)
-        {
-            return StatusCode(403, ThrowForbidden(ex));
         }
         catch(AuthenticationException ex)
         {
             return Unauthorized(ThrowUnauthorized(ex));
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, ThrowForbidden(ex));
         }
         catch(BadRequestException ex)
         {

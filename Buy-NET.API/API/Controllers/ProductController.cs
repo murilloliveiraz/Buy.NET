@@ -1,46 +1,46 @@
 using System.Security.Authentication;
-using Buy_NET.API.Contracts.Category;
-using Buy_NET.API.Exceptions;
-using Buy_NET.API.Services.Interfaces.CategoryServiceInterfaces;
+using Buy_NET.API.Contracts.Product;
+using Buy_NET.API.Domain.Exceptions;
+using Buy_NET.API.Services.Interfaces.ProductServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Buy_NET.API.Controllers;
 
 [ApiController]
-[Route("categorias")]
-public class CategoryController : BaseControllerBuyNet
+[Route("produtos")]
+public class ProductController : BaseControllerBuyNet
 {
-    private readonly ICategoryService  _categoryService;
+    private readonly IProductService  _productService;
 
-    public CategoryController(ICategoryService categoryService)
+    public ProductController(IProductService productService)
     {
-        _categoryService = categoryService;
+        _productService = productService;
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Create(CategoryRequestContract category)
+    public async Task<IActionResult> Create(ProductRequestContract product)
     {
         try
         {
-            var role = GetLoggedInUserRole();
-            long? id = GetLoggedInUser();
-            if (id is null || id == 0)
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
             {
-                throw new UnauthorizedAccessException("É necessário fazer login para ter acesso a esse método");
+                throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
             }
+            var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                throw new ForbiddenException("Voce não possui permissão para criar uma categoria");
+                return Unauthorized("Voce não possui permissão para criar um produto");
             }
-            return Created("", await _categoryService.Create(category));
+            return Created("", await _productService.Create(product));
         }
         catch (ForbiddenException ex)
         {
             return StatusCode(403, ThrowForbidden(ex));
         }
-        catch(UnauthorizedAccessException ex)
+        catch(AuthenticationException ex)
         {
             return Unauthorized(ThrowUnauthorized(ex));
         }
@@ -54,7 +54,6 @@ public class CategoryController : BaseControllerBuyNet
         }
         catch (Exception ex)
         {
-            
             return Problem(ex.Message);
         }
     }
@@ -65,12 +64,12 @@ public class CategoryController : BaseControllerBuyNet
     {
         try
         {
-            long? id = GetLoggedInUser();
-            if (id is null || id == 0)
+            long? idLogged = GetLoggedInUser();
+            if (idLogged is null || idLogged == 0)
             {
                 throw new AuthenticationException("É necessário fazer login para ter acesso a esse método");
             }
-            return Ok(await _categoryService.Get());
+            return Ok(await _productService.Get());
         }
         catch (ForbiddenException ex)
         {
@@ -107,11 +106,11 @@ public class CategoryController : BaseControllerBuyNet
             }
             if (id.HasValue)
             {
-                return Ok(await _categoryService.GetById(id.Value));
+                return Ok(await _productService.GetById(id.Value));
             }
             else if(!string.IsNullOrEmpty(name))
             {
-                return Ok(await _categoryService.GetByName(name));
+                return Ok(await _productService.GetByName(name));
             }
             else 
             {
@@ -142,7 +141,7 @@ public class CategoryController : BaseControllerBuyNet
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> Update(long id, CategoryRequestContract category)
+    public async Task<IActionResult> Update(long id, ProductRequestContract product)
     {
         try
         {
@@ -154,9 +153,9 @@ public class CategoryController : BaseControllerBuyNet
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                throw new ForbiddenException("Voce não possui permissão para atualizar uma categoria");
+                return Unauthorized("Voce não possui permissão para atualizar um produto");
             }
-            return Ok(await _categoryService.Update(id, category));
+            return Ok(await _productService.Update(id, product));
         }
         catch (ForbiddenException ex)
         {
@@ -194,9 +193,9 @@ public class CategoryController : BaseControllerBuyNet
             var role = GetLoggedInUserRole();
             if (role != "Admin")
             {
-                throw new ForbiddenException("Voce não possui permissão para deletar uma categoria");
+                return Unauthorized("Voce não possui permissão para deletar um produto");
             }
-            await _categoryService.Delete(id);
+            await _productService.Delete(id);
             return NoContent();
         }
         catch (ForbiddenException ex)
